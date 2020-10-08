@@ -20,7 +20,7 @@ controller:
   name: controller
   image:
     repository: spvest/azure-keyvault-controller
-    tag: 1.1.0
+    tag: 1.2.0-beta.1
     pullPolicy: IfNotPresent
     #pullSecret: secretName
 
@@ -37,7 +37,9 @@ controller:
   logLevel: info
   logFormat: fmt # fmt or json
 
-  
+  caBundle:
+    akvLabelName: azure-key-vault-env-injection
+    configMapName: akv2k8s-ca
 
   # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
   # env:
@@ -68,7 +70,7 @@ env_injector:
 
   image:
     repository: spvest/azure-keyvault-webhook
-    tag: 1.1.8
+    tag: 1.2.0-beta.1
     pullPolicy: IfNotPresent
 
   envImage:
@@ -84,19 +86,6 @@ env_injector:
   dockerImageInspection:
     timeout: 20 # Timeout in seconds
     useAksCredentialsWithACS: true # Only applicable if runningInsideAzureAks is also true
-
-  caBundleController:
-    image:
-      repository: spvest/ca-bundle-controller
-      tag: 1.1.0
-      pullPolicy: IfNotPresent
-    env: {}
-    labels: {}
-    podLabels: {}
-    logLevel: Info
-    logFormat: fmt # fmt or json
-    akvLabelName: azure-key-vault-env-injection
-    configMapName: akv2k8s-ca
 
   service:
     name: azure-keyvault-secrets-webhook

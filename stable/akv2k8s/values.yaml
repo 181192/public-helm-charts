@@ -1,4 +1,5 @@
 # Default values 
+name: akv2k8s
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -15,6 +16,16 @@ runningInsideAzureAks: true
 addAzurePodIdentityException: false
 cloudConfig: /etc/kubernetes/azure.json
 
+keyVault:
+  customAuth: false
+  useAuthService: true # set to false to use Azure Key Vault credentials from own pod
+
+  env: {}
+  # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
+  #   AZURE_TENANT_ID: <tenantId>
+  #   AZURE_CLIENT_ID: <clientId>
+  #   AZURE_CLIENT_SECRET: <clientSecret>
+
 controller:
   enabled: true
   name: controller
@@ -24,15 +35,10 @@ controller:
     pullPolicy: IfNotPresent
     #pullSecret: secretName
 
-  keyVault:
-    # Set to true to use custom auth - see https://akv2k8s.io/security/authentication/#custom-authentication-for-the-controller
-    customAuth:
-      enabled: false
-
-    polling:
-      normalInterval: 1m
-      failureInterval: 10m
-      failureAttempts: 5
+  keyVaultPolling:
+    normalInterval: 1m
+    failureInterval: 10m
+    failureAttempts: 5
 
   logLevel: info
   logFormat: fmt # fmt or json
@@ -78,12 +84,6 @@ env_injector:
   envImage:
     repository: spvest/azure-keyvault-env
     tag: 1.1.0
-
-  keyVault:
-    # Set to true to use custom auth - see https://github.com/SparebankenVest/azure-key-vault-to-kubernetes/blob/master/README.md#authentication
-    customAuth: 
-      enabled: false
-      useAuthService: true # set to false to use Azure Key Vault credentials from own pod
 
   dockerImageInspection:
     timeout: 20 # Timeout in seconds

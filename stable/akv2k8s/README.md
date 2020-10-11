@@ -31,6 +31,9 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 | crds.keep                                         | if this chart should keep azurekeyvaultsecret crd after uninstalling the chart - note: if set to false, all azurekeyvaultsecret resources created in the cluster will automatically be removed when the crd gets removed | true | 
 | rbac.create                                       | create rbac resources|true|
 | rbac.podSecurityPolicies                          | any pod security policies|{}|
+| keyVault.customAuth                               | if custom auth enabled | false |
+| keyVault.useAuthService                           | if auth service is used - set to false to force env-injector to use local pod credentials for azure key vault | true |
+| keyVault.env                                      | auth env vars used for auth with azure key vault | {}                                       |
 | runningInsideAzureAks                             | if running inside azure aks - set to false if running outside aks |true |
 
 ### Controller
@@ -42,10 +45,9 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 |controller.image.repository                        |image repo that contains the controller image | spvest/azure-keyvault-controller         |
 |controller.image.tag                               |image tag                                     | 1.2.0-beta.3|
 |controller.image.pullPolicy                        |pull policy                                   | IfNotPresent |
-|controller.keyVault.customAuth.enabled             |if custom auth is enabled                     | false |
-|controller.keyVault.polling.normalInterval         |interval to wait before polling azure key vault for secret updates | 1m |
-|controller.keyVault.polling.failureInterval        |interval to wait when polling has failed `failureAttempts` before polling azure key vault for secret updates | 5m |
-|controller.keyVault.polling.failureAttempts        |number of times to allow secret updates to fail before applying `failureInterval` | 5 |
+|controller.keyVaultPolling.normalInterval          |interval to wait before polling azure key vault for secret updates | 1m |
+|controller.keyVaultPolling.failureInterval         |interval to wait when polling has failed `failureAttempts` before polling azure key vault for secret updates | 5m |
+|controller.keyVaultPolling.failureAttempts         |number of times to allow secret updates to fail before applying `failureInterval` | 5 |
 |controller.logFormat                               |log format - fmt or json | fmt                   |
 |controller.logLevel                                |log level | info |
 |controller.labels                                  |any additional labels | {}
@@ -67,8 +69,6 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 |env_injector.image.pullPolicy                                |image pull policy                            |IfNotPresent                              |
 |env_injector.image.repository                                |image repo that contains the controller      |spvest/azure-keyvault-webhook             |
 |env_injector.image.tag                                       |image tag                                    |1.1.8                                    |
-|env_injector.keyVault.customAuth.enabled                     |if custom authentication with azure key vault is enabled |false                         |
-|env_injector.keyVault.customAuth.useAuthService              |if authService is to be used with custom auth |true                         |
 |env_injector.metrics.enabled                                 |if prometheus metrics is enabled             |false                                     |
 |env_injector.name                                            ||env-injector|
 |env_injector.nodeSelector                                    |node selector to use                         |{}                                        |

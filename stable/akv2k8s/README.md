@@ -40,7 +40,7 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 |controller.enabled                                 | if controller will be installed | true |
 |controller.env                                     |aditional env vars to send to pod             | {}                                       |
 |controller.image.repository                        |image repo that contains the controller image | spvest/azure-keyvault-controller         |
-|controller.image.tag                               |image tag                                     |1.1.0|
+|controller.image.tag                               |image tag                                     | 1.2.0-beta.3|
 |controller.image.pullPolicy                        |pull policy                                   | IfNotPresent |
 |controller.keyVault.customAuth.enabled             |if custom auth is enabled                     | false |
 |controller.keyVault.polling.normalInterval         |interval to wait before polling azure key vault for secret updates | 1m |
@@ -57,16 +57,7 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 | ----------------------------------------------------------- | ------------------------------------------- | -----------------------------------------|
 |env_injector.enabled                                         | if the env-injector will be installed | true |
 |env_injector.affinity                                        |affinities to use                            |{}                                        |
-|env_injector.caBundleController.akvLabelName                 |akv label used in namespaces|azure-key-vault-env-injection|
-|env_injector.caBundleController.configMapName                |configmap name to store ca cert|akv2k8s-ca|
-|env_injector.caBundleController.env                          |Env vars to add to the ca-bundle pod         |{} |
-|env_injector.caBundleController.image.pullPolicy             |pull policy for ca bundler|IfNotPresent|
-|env_injector.caBundleController.image.repository             |image repository for ca bundler|spvest/ca-bundle-controller|
-|env_injector.caBundleController.image.tag                    |image tag for ca bundler                     |1.1.0|
-|env_injector.caBundleController.labels                       |Labels to add to the ca-bundle deployment    |{} |
-|env_injector.caBundleController.logLevel                     |log level - Trace, Debug, Info, Warning, Error, Fatal or Panic|Info|
-|env_injector.caBundleController.logFormat                    |log format - fmt or json|fmt|
-|env_injector.caBundleController.podLabels                    |Labels to add to the ca-bundle pod           |{} |
+|env_injector.caBundleConfigMapName                           |name of configmap containing ca bundle       |akv2k8s-ca                |
 |env_injector.cloudConfigHostPath                             |path to azure cloud config                   |/etc/kubernetes/azure.json                |
 |env_injector.dockerImageInspection.timeout                   |timeout in seconds                           |20                                        |
 |env_injector.dockerImageInspection.useAksCredentialsWithACS  |                                             |true|
@@ -81,6 +72,8 @@ kubectl apply -f https://raw.githubusercontent.com/sparebankenvest/azure-key-vau
 |env_injector.metrics.enabled                                 |if prometheus metrics is enabled             |false                                     |
 |env_injector.name                                            ||env-injector|
 |env_injector.nodeSelector                                    |node selector to use                         |{}                                        |
+|env_injector.namespaceEnableLabel.name                       |namespace label name for enabling env-injection | azure-key-vault-env-injection         |
+|env_injector.namespaceEnableLabel.value                      |namespace label value for enabling env-injection | enabled                              |
 |env_injector.replicaCount                                    |number of replicas                           |2                                         |
 |env_injector.resources                                       |resources to request                         |{}                                        |
 |env_injector.service.name                                    |webhook service name                         |azure-keyvault-secrets-webhook            |

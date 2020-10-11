@@ -35,11 +35,6 @@ controller:
     pullPolicy: IfNotPresent
     #pullSecret: secretName
 
-  keyVaultPolling:
-    normalInterval: 1m
-    failureInterval: 10m
-    failureAttempts: 5
-
   logLevel: info
   logFormat: fmt # fmt or json
 

@@ -5,29 +5,23 @@ kind: Deployment
 metadata:
   name: {{ template "akv2k8s.envinjector.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-    helm.sh/chart: {{ template "akv2k8s.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: env-injector-webhook
-{{- if .Values.env_injector.webhook.labels }}
-{{ toYaml .Values.env_injector.webhook.labels | nindent 4 }}
+    {{- include "akv2k8s.labels" . | nindent 4 }}
+{{- if .Values.env_injector.labels }}
+{{ toYaml .Values.env_injector.labels | nindent 4 }}
 {{- end}}
 spec:
   replicas: {{ .Values.env_injector.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: env-injector-webhook
+      {{- include "akv2k8s.selectors" . | nindent 6 }}
+      {{- include "akv2k8s.components.webhook" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: env-injector-webhook
-{{- if .Values.env_injector.webhook.podLabels }}
-{{ toYaml .Values.env_injector.webhook.podLabels | indent 8 }}
+        {{- include "akv2k8s.selectors" . | nindent 8 }}
+        {{- include "akv2k8s.components.webhook" . | nindent 8 }}
+{{- if .Values.env_injector.podLabels }}
+{{ toYaml .Values.env_injector.podLabels | indent 8 }}
 {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/env-injector-apiservice.yaml") . | sha256sum }}
@@ -71,13 +65,13 @@ spec:
           - name: DOCKER_IMAGE_INSPECTION_USE_ACS_CREDENTIALS
             value: {{ .Values.env_injector.dockerImageInspection.useAksCredentialsWithACS | quote }}
           - name: LOG_LEVEL
-            value: {{ .Values.env_injector.webhook.logLevel | quote }}
+            value: {{ .Values.env_injector.logLevel | quote }}
           - name: LOG_FORMAT
-            value: {{ .Values.env_injector.webhook.logFormat | quote }}
+            value: {{ .Values.env_injector.logFormat | quote }}
           - name: METRICS_ENABLED
             value: {{ .Values.env_injector.metrics.enabled | quote }}
-          {{- if .Values.env_injector.webhook.env }}
-          {{- range $key, $value := .Values.env_injector.webhook.env }}
+          {{- if .Values.env_injector.env }}
+          {{- range $key, $value := .Values.env_injector.env }}
           - name: {{ $key }}
             valueFrom:
               secretKeyRef:
@@ -114,8 +108,8 @@ spec:
             readOnly: true
           {{- end }}
           securityContext:
-            {{- if .Values.env_injector.webhook.securityContext }}
-{{ toYaml .Values.env_injector.webhook.securityContext | indent 12 }}
+            {{- if .Values.env_injector.securityContext }}
+{{ toYaml .Values.env_injector.securityContext | indent 12 }}
             {{- end }}
           resources:
 {{ toYaml .Values.env_injector.resources | indent 12 }}

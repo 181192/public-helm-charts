@@ -5,10 +5,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "akv2k8s.envinjector.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-    helm.sh/chart: {{ template "akv2k8s.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "akv2k8s.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""
@@ -22,6 +19,7 @@ rules:
   - ""
   resources:
   - secrets # in order to inspect docker image with ImagePullSecrets
+  - namespaces # needed to authorize injector requests
   verbs:
   - get
 ---
@@ -32,10 +30,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "akv2k8s.envinjector.fullname" . }}-reader
   labels:
-    app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-    helm.sh/chart: {{ template "akv2k8s.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "akv2k8s.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - spv.no
@@ -52,10 +47,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ template "akv2k8s.envinjector.fullname" . }}-sa
   labels:
-    app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-    helm.sh/chart: {{ template "akv2k8s.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "akv2k8s.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
   namespace: {{ .Release.Namespace }}
@@ -72,10 +64,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ template "akv2k8s.envinjector.fullname" . }}-reader
   labels:
-    app.kubernetes.io/name: {{ template "akv2k8s.envinjector.name" . }}
-    helm.sh/chart: {{ template "akv2k8s.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "akv2k8s.labels" . | nindent 4 }}
 subjects:
 - kind: Group
   name: system:serviceaccounts

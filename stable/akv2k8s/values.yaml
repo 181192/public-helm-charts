@@ -12,38 +12,22 @@ crds:
   create: true
   keep: true
 
-runningInsideAzureAks: true
-addAzurePodIdentityException: false
+addAzurePodIdentityException: false # see https://github.com/Azure/aad-pod-identity/blob/master/docs/readmes/README.app-exception.md
 cloudConfig: /etc/kubernetes/azure.json
 
-keyVault:
-  customAuth: false
-  useAuthService: true # set to false to use Azure Key Vault credentials from own pod
-
-  env: {}
-  # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
-  #   AZURE_TENANT_ID: <tenantId>
-  #   AZURE_CLIENT_ID: <clientId>
-  #   AZURE_CLIENT_SECRET: <clientSecret>
-
 controller:
-  enabled: true
   name: controller
   image:
     repository: spvest/azure-keyvault-controller
-    tag: 1.2.0-beta.12
+    tag: 1.2.0-beta.13
     pullPolicy: IfNotPresent
     #pullSecret: secretName
 
   logLevel: info
   logFormat: fmt # fmt or json
 
-  # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
-  # env:
-  #   AZURE_TENANT_ID: <tenantId>
-  #   AZURE_CLIENT_ID: <clientId>
-  #   AZURE_CLIENT_SECRET: <clientSecret>
-  
+  keyVaultAuth: azureCloudConfig # azureCloudConfig (aks credentials), environment (custom)  
+
   serviceAccount:
     create: true
     ## The name of the ServiceAccount to use.
@@ -51,6 +35,10 @@ controller:
     name:
 
   env: {}
+  # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
+  #   AZURE_TENANT_ID: <tenantId>
+  #   AZURE_CLIENT_ID: <clientId>
+  #   AZURE_CLIENT_SECRET: <clientSecret>
   labels: {}
   podLabels: {}
 
@@ -63,22 +51,45 @@ env_injector:
   enabled: true
   name: env-injector
 
-  namespaceEnableLabel: 
-    name: azure-key-vault-env-injection
-    value: enabled
-
-  caBundleConfigMapName: akv2k8s-ca
-
-  replicaCount: 2
+  keyVaultAuth: cloudConfig # cloudConfig, environment,  
+  authService: true # set to false to provide azure key vault credentials 
+                    # locally (through e.g. env vars) in each pod
 
   image:
     repository: spvest/azure-keyvault-webhook
     tag: 1.1.8
     pullPolicy: IfNotPresent
 
+  replicaCount: 2
+
   envImage:
     repository: spvest/azure-keyvault-env
     tag: 1.1.0
+
+  logLevel: Info
+  logFormat: fmt # ftm or json
+
+  certificate:
+    useCertManager: false
+    custom:
+      enabled: false
+      server:
+        tls:
+          crt:
+          key:
+      ca:
+        crt:
+
+  securityContext:
+    allowPrivilegeEscalation: true # must be true if using aks identity
+  #   runAsUser: 65534
+
+  namespaceLabelSelector:
+    label: 
+      name: azure-key-vault-env-injection
+      value: enabled
+
+  caBundleConfigMapName: akv2k8s-ca
 
   dockerImageInspection:
     timeout: 20 # Timeout in seconds
@@ -102,56 +113,38 @@ env_injector:
         insecureSkipVerify: true
       additionalLabels: {}
 
-  webhook:
-    logLevel: Info
-    logFormat: fmt # ftm or json
-
-    securityContext:
-      allowPrivilegeEscalation: true # must be true if using aks identity
-    #   runAsUser: 65534
-
-    env: {}
-    labels: {}
-    podLabels: {}
-
-    certificate:
-      useCertManager: false
-      custom:
-        enabled: false
-        server:
-          tls:
-            crt:
-            key:
-        ca:
-          crt:
-
-    ## See `kubectl explain poddisruptionbudget.spec` for more
-    ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
-    podDisruptionBudget:
-      enabled: true
-      minAvailable: 1
-    #  maxUnavailable: 1
-
-    # What will happen if the webhook fails? Ignore (continue) or Fail (prevent Pod from starting)?
-    failurePolicy: Fail
-
-    # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-namespaceselector
-    namespaceSelector:
-      matchLabels:
-        azure-key-vault-env-injection: enabled # The webhook will only trigger i namespaces with this label
-
-      # Prevent env injection for pods in kube-system as recomended: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#avoiding-operating-on-the-kube-system-namespace
-      matchExpressions:
-      - key: name
-        operator: NotIn
-        values:
-        - kube-system
-
   serviceAccount:
     create: true
     ## The name of the ServiceAccount to use.
     ## If not set and create is true, a name is generated using the fullname template
     name:
+
+  env: {}
+  # Uncomment to use client-id / secret - see https://akv2k8s.io/security/authentication/#custom-authentication-options
+  #   AZURE_TENANT_ID: <tenantId>
+  #   AZURE_CLIENT_ID: <clientId>
+  #   AZURE_CLIENT_SECRET: <clientSecret>
+  labels: {}
+  podLabels: {}
+
+  ## See `kubectl explain poddisruptionbudget.spec` for more
+  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  #  maxUnavailable: 1
+
+  # What will happen if the webhook fails? Ignore (continue) or Fail (prevent Pod from starting)?
+  failurePolicy: Fail
+
+  # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-namespaceselector
+  namespaceSelector:
+    # Prevent env injection for pods in kube-system as recomended: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#avoiding-operating-on-the-kube-system-namespace
+    matchExpressions:
+    - key: name
+      operator: NotIn
+      values:
+      - kube-system
 
   resources: {}
   nodeSelector: {}

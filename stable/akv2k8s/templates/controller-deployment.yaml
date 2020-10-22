@@ -46,7 +46,7 @@ spec:
         {{- end }}
         args:
           - "--cloudconfig={{ .Values.cloudConfig }}"
-          # - "--version={{ .Values.controller.image.tag }}"
+          - "--version={{ .Values.controller.image.tag }}"
   {{- if eq .Values.controller.keyVaultAuth "azureCloudConfig" }}
         volumeMounts:
           - name: azure-config

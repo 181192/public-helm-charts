@@ -19,9 +19,8 @@ controller:
   name: controller
   image:
     repository: spvest/azure-keyvault-controller
-    tag: 1.2.0-beta.14
+    tag: 1.2.0-beta.29
     pullPolicy: IfNotPresent
-    #pullSecret: secretName
 
   logLevel: info
   logFormat: fmt # fmt or json
@@ -56,14 +55,14 @@ env_injector:
 
   image:
     repository: spvest/azure-keyvault-webhook
-    tag: 1.2.0-beta.2
+    tag: 1.2.0-beta.15
     pullPolicy: IfNotPresent
 
   replicaCount: 2
 
   envImage:
     repository: spvest/azure-keyvault-env
-    tag: 1.2.0-beta.1
+    tag: 1.2.0-beta.7
 
   logLevel: Info
   logFormat: fmt # ftm or json
@@ -99,6 +98,8 @@ env_injector:
     type: ClusterIP
     externalTlsPort: 443
     internalTlsPort: 443
+    externalAuthPort: 8443
+    internalAuthPort: 8443
     externalHttpPort: 80
     internalHttpPort: 80
 
